@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Game Mở Hộp Quà</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin: 20px;
+        background-color: #f8f9fa;
+      }
+      h1 {
+        font-size: 28px;
+        color: #d63384;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        margin-bottom: 20px;
+      }
+      .gift-container {
+        display: none;
+        grid-template-columns: repeat(3, 120px);
+        gap: 15px;
+        justify-content: center;
+      }
+      .gift-box {
+        width: 120px;
+        height: 120px;
+        background: url("https://cdn-icons-png.flaticon.com/512/8146/8146553.png")
+          no-repeat center/cover;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: bold;
+        border: none;
+        position: relative;
+        animation: shake 1.5s infinite;
+      }
+      .gift-box.opened {
+        background: none;
+        border: none;
+        background-color: transparent;
+        flex-direction: column;
+      }
+      .gift-icon {
+        width: 80px;
+        height: 80px;
+      }
+      .gift-name {
+        display: none;
+        font-size: 16px;
+        font-weight: bold;
+        color: #333;
+        margin-top: 5px;
+      }
+      .gift-box.show-name .gift-name {
+        display: block;
+      }
+      .gift-box.show-name .gift-icon {
+        display: none;
+      }
+      @keyframes shake {
+        0%,
+        100% {
+          transform: rotate(0);
+        }
+        25% {
+          transform: rotate(2deg);
+        }
+        50% {
+          transform: rotate(-2deg);
+        }
+        75% {
+          transform: rotate(2deg);
+        }
+      }
+      #startBtn {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 15px 30px;
+        font-size: 20px;
+        background: linear-gradient(to right, #ff66b2, #ff99cc);
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+        box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+      }
+      #startBtn:hover {
+        background: linear-gradient(to right, #ff99cc, #ff66b2);
+        transform: translate(-50%, -50%) scale(1.1);
+      }
+      #playAgainBtn {
+        display: none;
+        margin: 20px auto;
+        padding: 10px 20px;
+        font-size: 18px;
+        background: linear-gradient(to right, #ff66b2, #ff99cc);
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+      #popup {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 20px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        width: 300px;
+        text-align: center;
+      }
+      #popup button {
+        margin-top: 10px;
+        padding: 10px 15px;
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="startBtn" onclick="startGame()">Start</button>
+    <h1 style="display: none">🎁 Chọn 3 Hộp Quà Đi Người Đẹp 🎁</h1>
+    <button id="playAgainBtn" onclick="showPopup()">Chơi Lại</button>
+    <div class="gift-container" id="giftContainer"></div>
+    <div id="popup">
+      <p>Chọn đủ 3 món quà rồi còn muốn chơi lại hả người đẹp!?</p>
+      <button onclick="resetGame()">Đúng vậy</button>
+    </div>
+    <script>
+      const giftIcons = {
+        "Nước hoa": "https://cdn-icons-png.flaticon.com/512/539/539518.png",
+        "Quần dài": "https://cdn-icons-png.flaticon.com/512/2346/2346867.png",
+        "Túi xách": "https://cdn-icons-png.flaticon.com/512/11610/11610293.png",
+        "100k": "https://cdn-icons-png.flaticon.com/512/7059/7059269.png",
+        "50k": "https://cdn-icons-png.flaticon.com/512/7059/7059298.png",
+        "20k": "https://cdn-icons-png.flaticon.com/512/925/925674.png",
+        "10k": "https://cdn-icons-png.flaticon.com/512/10500/10500000.png",
+        "5k": "https://cdn-icons-png.flaticon.com/512/1001/1001076.png",
+        "2k": "https://cdn-icons-png.flaticon.com/512/10692/10692946.png",
+      };
+
+      const gifts = Object.keys(giftIcons);
+      let selectedGifts = [];
+
+      function startGame() {
+        document.getElementById("startBtn").style.display = "none";
+        document.querySelector("h1").style.display = "block";
+        document.getElementById("giftContainer").style.display = "grid";
+        createGiftBoxes();
+      }
+
+      function shuffle(array) {
+        return array.sort(() => Math.random() - 0.5);
+      }
+
+      function createGiftBoxes() {
+        const container = document.getElementById("giftContainer");
+        container.innerHTML = "";
+        const shuffledGifts = shuffle([...gifts]);
+        shuffledGifts.forEach((gift) => {
+          const box = document.createElement("div");
+          box.classList.add("gift-box");
+          box.onclick = () => openGift(box, gift);
+          container.appendChild(box);
+        });
+      }
+
+      function openGift(box, gift) {
+        if (selectedGifts.length < 3 && !selectedGifts.includes(box)) {
+          box.classList.add("opened");
+          box.innerHTML = `<img src="${giftIcons[gift]}" class="gift-icon" alt="${gift}"> <div class='gift-name'>${gift}</div>`;
+          selectedGifts.push(box);
+          box.onclick = () => box.classList.toggle("show-name");
+        }
+        if (selectedGifts.length === 3) {
+          document.getElementById("playAgainBtn").style.display = "block";
+        }
+      }
+
+      function showPopup() {
+        document.getElementById("popup").style.display = "block";
+      }
+
+      function resetGame() {
+        selectedGifts = [];
+        document.getElementById("popup").style.display = "none";
+        document.getElementById("playAgainBtn").style.display = "none";
+        createGiftBoxes();
+      }
+    </script>
+  </body>
+</html>
